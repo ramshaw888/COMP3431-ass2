@@ -21,7 +21,7 @@ private:
   
   double cameraWidth;
   double cameraHeight;
-  double imageSize;
+  int imageSize;
   
   ros::NodeHandle n;
 
@@ -41,7 +41,9 @@ ImagePub::ImagePub()
   cameraWidth = pi_cam.getWidth();
   cameraHeight = pi_cam.getHeight();
   imageSize = pi_cam.getImageTypeSize( raspicam::RASPICAM_FORMAT_RGB);
-
+    
+  //initialize memory for the current image
+  currImg = new unsigned char[imageSize]; //NOTE: this image will be of type RGB8
   //wait while the camera stabilizes
   usleep(3);
 }
@@ -57,7 +59,7 @@ void ImagePub::capture()
   pi_cam.grab();
 
   //extract image in RGB
-  pi_cam.retrieve( currImg, raspicam::RASPICAM_FORMAT_RGB);
+  pi_cam.retrieve( currImg, raspicam::RASPICAM_FORMAT_IGNORE);
 }
 
 void ImagePub::publish()
@@ -65,15 +67,17 @@ void ImagePub::publish()
   // CURRENTLY JUST SAVES TO FILE
   std::ofstream outFile ( "raspicam_image.ppm", std::ios::binary );
   outFile<< "P6\n" << pi_cam.getWidth() << " " << pi_cam.getHeight() << " 255\n";
-  outFile.write((char*) currImg, pi_cam.getImageTypeSize ( raspicam::RASPICAM_FORMAT_RGB ));
+  outFile.write((char*) currImg, imageSize);
 
 }
 
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "Image Publisher");
+  ros::init(argc, argv, "imagePub");
+  ros::NodeHandle n;
   ros::Rate r(100);
+   
 
   ImagePub p = ImagePub();
 
