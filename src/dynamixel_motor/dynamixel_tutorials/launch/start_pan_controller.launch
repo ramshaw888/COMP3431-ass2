@@ -1,0 +1,12 @@
+<launch>
+    <!-- Start pan joint controller -->
+    <rosparam file="$(find dynamixel_tutorials)/config/pan.yaml" command="load"/>
+    <node name="pan_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port pan_tilt_port
+                pan_controller_1
+                pan_controller_2
+                pan_controller_3
+                pan_controller_4"
+          output="screen"/>
+</launch>
