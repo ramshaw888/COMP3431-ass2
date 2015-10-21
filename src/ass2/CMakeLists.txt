@@ -190,3 +190,5 @@ include_directories(
 
 add_executable(commander src/commander.cpp)
 target_link_libraries(commander ${catkin_LIBRARIES})
+add_executable(joyStickConverter src/joy_stick_converter.cpp)
+target_link_libraries(joyStickConverter ${catkin_LIBRARIES})
