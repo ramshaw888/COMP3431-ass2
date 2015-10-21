@@ -73,9 +73,9 @@ void ImagePub::capture()
 void ImagePub::publish()
 {
   // CURRENTLY JUST SAVES TO FILE
-  std::ofstream outFile ( "raspicam_image.ppm", std::ios::binary );
-  outFile<< "P6\n" << pi_cam.getWidth() << " " << pi_cam.getHeight() << " 255\n";
-  outFile.write((char*) currImg, imageSize);
+  //std::ofstream outFile ( "raspicam_image.ppm", std::ios::binary );
+  //outFile<< "P6\n" << pi_cam.getWidth() << " " << pi_cam.getHeight() << " 255\n";
+  //outFile.write((char*) currImg, imageSize);
 
   // create image message
   sensor_msgs::Image message;
