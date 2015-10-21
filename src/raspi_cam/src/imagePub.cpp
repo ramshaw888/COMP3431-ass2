@@ -8,8 +8,8 @@
 
 #include "ros/ros.h"
 #include "ros/console.h"
-//#include "sensor_msgs/image_encodings.h"
-//#include <sensor_msgs/Image.msg>
+#include "sensor_msgs/image_encodings.h"
+#include "sensor_msgs/Image.h"
 
 
 using namespace std;
@@ -22,8 +22,9 @@ private:
   double cameraWidth;
   double cameraHeight;
   int imageSize;
-  
+
   ros::NodeHandle n;
+  ros::Publisher publisher;
 
 public:
   ImagePub();  
@@ -34,6 +35,9 @@ public:
 
 ImagePub::ImagePub()
 {
+  //initialise publisher
+  publisher = n.advertise<sensor_msgs::Image>("/camera/image", 1);
+
   //open the camera
   ROS_DEBUG("Opening Camera..");
   if ( !pi_cam.open()) { ROS_ERROR("Error opening camera"); return; }
@@ -62,6 +66,8 @@ void ImagePub::capture()
   pi_cam.retrieve( currImg, raspicam::RASPICAM_FORMAT_IGNORE);
 }
 
+// Responsible creaming a sensor_msgs/image message that includes the current image
+// and publishing it to 'camera/image'
 void ImagePub::publish()
 {
   // CURRENTLY JUST SAVES TO FILE
@@ -69,6 +75,15 @@ void ImagePub::publish()
   outFile<< "P6\n" << pi_cam.getWidth() << " " << pi_cam.getHeight() << " 255\n";
   outFile.write((char*) currImg, imageSize);
 
+  sensor_msgs::Image message;
+
+  message.height = cameraHeight;
+  message.width = cameraWidth;
+  //message.encoding = RGB8;
+  message.step = 3 * cameraWidth; // 3 bytes per pixel
+  //message.data = * currImg;
+
+  publisher.publish(message);
 }
 
 
@@ -77,7 +92,6 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "imagePub");
   ros::NodeHandle n;
   ros::Rate r(100);
-   
 
   ImagePub p = ImagePub();
 
