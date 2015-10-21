@@ -21,6 +21,7 @@ private:
   
   double cameraWidth;
   double cameraHeight;
+  double cameraStep; // Full row length in bytes; 3 bytes per pixel
   int imageSize;
 
   ros::NodeHandle n;
@@ -44,7 +45,8 @@ ImagePub::ImagePub()
 
   cameraWidth = pi_cam.getWidth();
   cameraHeight = pi_cam.getHeight();
-  imageSize = pi_cam.getImageTypeSize( raspicam::RASPICAM_FORMAT_RGB);
+  cameraStep = 3 * cameraWidth;
+  imageSize = pi_cam.getImageTypeSize(raspicam::RASPICAM_FORMAT_RGB);
     
   //initialize memory for the current image
   currImg = new unsigned char[imageSize]; //NOTE: this image will be of type RGB8
@@ -63,7 +65,7 @@ void ImagePub::capture()
   pi_cam.grab();
 
   //extract image in RGB
-  pi_cam.retrieve( currImg, raspicam::RASPICAM_FORMAT_IGNORE);
+  pi_cam.retrieve(currImg, raspicam::RASPICAM_FORMAT_IGNORE);
 }
 
 // Responsible creaming a sensor_msgs/image message that includes the current image
@@ -75,13 +77,15 @@ void ImagePub::publish()
   outFile<< "P6\n" << pi_cam.getWidth() << " " << pi_cam.getHeight() << " 255\n";
   outFile.write((char*) currImg, imageSize);
 
+  // create image message
   sensor_msgs::Image message;
-
+  message.header = std_msgs::Header();
   message.height = cameraHeight;
   message.width = cameraWidth;
-  //message.encoding = RGB8;
-  message.step = 3 * cameraWidth; // 3 bytes per pixel
-  //message.data = * currImg;
+  message.encoding = "bgr8";
+  message.is_bigendian = false;
+  message.step = cameraStep;
+  message.data = * currImg;
 
   publisher.publish(message);
 }
