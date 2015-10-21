@@ -9,7 +9,7 @@
 #include "ros/ros.h"
 #include "ros/console.h"
 #include "sensor_msgs/image_encodings.h"
-#include <sensor_msgs/Image.msg>
+#include "sensor_msgs/Image.h"
 
 
 using namespace std;
@@ -36,7 +36,7 @@ public:
 ImagePub::ImagePub()
 {
   //initialise publisher
-  p = n.advertise<sensor_msgs::Image>("/camera/image", 1);
+  publisher = n.advertise<sensor_msgs::Image>("/camera/image", 1);
 
   //open the camera
   ROS_DEBUG("Opening Camera..");
@@ -79,9 +79,9 @@ void ImagePub::publish()
 
   message.height = cameraHeight;
   message.width = cameraWidth;
-  message.encoding = image_encodings::RGB8;
+  //message.encoding = RGB8;
   message.step = 3 * cameraWidth; // 3 bytes per pixel
-  message.data = currImg;
+  //message.data = * currImg;
 
   publisher.publish(message);
 }
