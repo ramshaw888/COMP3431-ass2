@@ -44,6 +44,7 @@ Commander::Commander(ros::NodeHandle n_): n(n_) {
 }
 
 void Commander::geometryCallback(const geometry_msgs::TwistStamped::ConstPtr& vector) {
+    ROS_INFO("COMMANDER: MESSAGE RECEIVED");
     geometry_msgs::Twist v = vector->twist;    
     if(v.angular.z == 0) {
         forward(v.linear.x);

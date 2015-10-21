@@ -1,10 +1,11 @@
 #include "ros/ros.h"
 #include "geometry_msgs/TwistStamped.h"
+#include "sensor_msgs/Joy.h"
 
 class JoyStickConverter {
 public:
     JoyStickConverter(ros::NodeHandle n_);
-    void joyStickCallback(const geometry_msgs::TwistStamped::ConstPtr& vector); 
+    void joyStickCallback(const sensor_msgs::Joy::ConstPtr& joystick_message); 
     void publish(geometry_msgs::TwistStamped vector);
 private:
     ros::NodeHandle n;
@@ -17,12 +18,16 @@ private:
 JoyStickConverter::JoyStickConverter(ros::NodeHandle n_): n(n_) {
     motor_vector = n.advertise<geometry_msgs::TwistStamped>("command_vector", 1000);
 
-    joyStickSubscriber = n.subscribe("joy_stick_topic", 1, &JoyStickConverter::joyStickCallback, this);
+    joyStickSubscriber = n.subscribe("joy", 1, &JoyStickConverter::joyStickCallback, this);
     
 }
 
-void JoyStickConverter::joyStickCallback(const geometry_msgs::TwistStamped::ConstPtr& vector) {
-    // do something
+void JoyStickConverter::joyStickCallback(const sensor_msgs::Joy::ConstPtr& joystick_message) {
+    ROS_INFO("joystick recieved");
+    geometry_msgs::TwistStamped vector;
+    vector.twist.linear.x = joystick_message->axes[1] * 10;
+    vector.twist.linear.y = joystick_message->axes[0] * 10;
+    vector.twist.angular.z = 0;
     motor_vector.publish(vector);
 }
 
@@ -39,7 +44,8 @@ int main(int argc, char **argv) {
     JoyStickConverter cortana(n);
     ROS_INFO("JoyStickConverter Initialised");
 
-    ros::Rate loop_rate(1);
+    ros::spin();
+    /*ros::Rate loop_rate(1);
     bool forward = true;
     while(ros::ok()) {
         
@@ -57,6 +63,6 @@ int main(int argc, char **argv) {
         cortana.publish(mockMessage);
         ros::spinOnce();
         loop_rate.sleep();
-    }
+    }*/
 
 }
