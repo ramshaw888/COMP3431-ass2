@@ -18,6 +18,9 @@ private:
     ros::Publisher motor_2_commander;
     ros::Publisher motor_3_commander;
     ros::Publisher motor_4_commander;
+    ros::Publisher servo_1_commander;
+    ros::Publisher servo_2_commander;
+    ros::Publisher servo_3_commander;
     
     ros::Subscriber geometry_sub;
 
@@ -33,6 +36,10 @@ Commander::Commander(ros::NodeHandle n_): n(n_) {
     motor_3_commander = n.advertise<std_msgs::Float64>("/pan_controller_3/command", 1000);
     motor_4_commander = n.advertise<std_msgs::Float64>("/pan_controller_4/command", 1000);
 
+    servo_1_commander = n.advertise<std_msgs::Float64>("/tilt_controller_1/command", 1000);
+    servo_2_commander = n.advertise<std_msgs::Float64>("/tilt_controller_2/command", 1000);
+    servo_3_commander = n.advertise<std_msgs::Float64>("/tilt_controller_3/command", 1000);
+
     geometry_sub = n.subscribe("command_vector", 1, &Commander::geometryCallback, this);
 }
 
@@ -44,6 +51,13 @@ void Commander::geometryCallback(const geometry_msgs::TwistStamped::ConstPtr& ve
     else {
         left(v.angular.z);
     }
+
+    std_msgs::Float64 tilt1;
+    tilt1.data = -1.25;
+    servo_1_commander.publish(tilt1);
+    std_msgs::Float64 tilt2;
+    tilt2.data = -1.75;
+    servo_2_commander.publish(tilt2);
 }
 
 void Commander::forward(double speed) {

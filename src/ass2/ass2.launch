@@ -20,7 +20,10 @@
               pan_controller_1
               pan_controller_2
               pan_controller_3
-              pan_controller_4"
+              pan_controller_4
+              tilt_controller_1
+              tilt_controller_2
+              tilt_controller_3"
         output="screen"/>
     <node name="commander" pkg="ass2" type="commander" output="screen"/>
     <node name="joyStickConverter" pkg="ass2" type="joyStickConverter" output="screen"/>

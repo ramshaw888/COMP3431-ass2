@@ -6,7 +6,7 @@ pan_controller_1:
     joint_name: pan_joint_1
     joint_speed: 1.17
     motor:
-        id: 3
+        id: 4
         init: 512
         min: 0
         max: 4095
@@ -19,7 +19,7 @@ pan_controller_2:
     joint_name: pan_joint_2
     joint_speed: 1.17
     motor:
-        id: 5
+        id: 8
         init: 512
         min: 0
         max: 4095
@@ -31,7 +31,7 @@ pan_controller_3:
     joint_name: tilt_joint_3
     joint_speed: 1.17
     motor:
-        id: 7
+        id: 5
         init: 512
         min: 0
         max: 4095
@@ -43,7 +43,44 @@ pan_controller_4:
     joint_name: tilt_joint_4
     joint_speed: 1.17
     motor:
+        id: 9
+        init: 512
+        min: 0
+        max: 4095
+tilt_controller_1:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: position_joint_1
+    joint_speed: 1.17
+    motor: 
+        id: 6
+        init: 512
+        min: 0
+        max: 4095
+tilt_controller_2:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: position_joint_2
+    joint_speed: -1.17
+    motor: 
+        id: 7
+        init: 512
+        min: 0
+        max: 1023
+tilt_controller_3:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: position_joint_3
+    joint_speed: 1.17
+    motor: 
         id: 10
         init: 512
         min: 0
         max: 4095
+
