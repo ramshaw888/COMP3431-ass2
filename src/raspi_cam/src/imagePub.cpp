@@ -36,7 +36,7 @@ public:
 ImagePub::ImagePub()
 {
   //initialise publisher
-  publisher = n.advertise<sensor_msgs::Image>("/camera/image", 1);
+  publisher = n.advertise<sensor_msgs::Image>("/camera_image", 1);
 
   //open the camera
   ROS_DEBUG("Opening Camera..");
@@ -70,19 +70,15 @@ void ImagePub::capture()
 // and publishing it to 'camera/image'
 void ImagePub::publish()
 {
-  // CURRENTLY JUST SAVES TO FILE
-  std::ofstream outFile ( "raspicam_image.ppm", std::ios::binary );
-  outFile<< "P6\n" << pi_cam.getWidth() << " " << pi_cam.getHeight() << " 255\n";
-  outFile.write((char*) currImg, imageSize);
-
   sensor_msgs::Image message;
 
+  //set message variables
   message.height = cameraHeight;
   message.width = cameraWidth;
-  //message.encoding = RGB8;
-  message.step = 3 * cameraWidth; // 3 bytes per pixel
-  //message.data = * currImg;
-
+  message.encoding = sensor_msgs::image_encodings::RGB8;
+  message.step = cameraWidth / 8;
+  message.data = std::vector<unsigned char>(currImg, currImg + sizeof currImg / sizeof currImg[0]);
+      
   publisher.publish(message);
 }
 
