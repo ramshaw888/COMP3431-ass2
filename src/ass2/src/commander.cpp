@@ -20,6 +20,11 @@ private:
     ros::Publisher motor_4_commander;
     
     ros::Subscriber geometry_sub;
+
+    void forward(double speed);
+    void left(double speed);
+    void right(double speed);
+    void back(double speed);
 };
 
 Commander::Commander(ros::NodeHandle n_): n(n_) {
@@ -32,18 +37,77 @@ Commander::Commander(ros::NodeHandle n_): n(n_) {
 }
 
 void Commander::geometryCallback(const geometry_msgs::TwistStamped::ConstPtr& vector) {
-    
+    geometry_msgs::Twist v = vector->twist;    
+    if(v.angular.z == 0) {
+        forward(v.linear.x);
+    }
+    else {
+        left(v.angular.z);
+    }
+}
+
+void Commander::forward(double speed) {
     std_msgs::Float64 command1;
     std_msgs::Float64 command2;
     std_msgs::Float64 command3;
     std_msgs::Float64 command4;
 
-    command1.data = 1.0f;
-    command2.data = 2.0f;
-    command3.data = -3.0f;
-    command4.data = -4.0f;
+    command1.data = speed;
+    command2.data = speed;
+    command3.data = -speed;
+    command4.data = -speed;
+    
+    motor_1_commander.publish(command1);
+    motor_2_commander.publish(command2);
+    motor_3_commander.publish(command3);
+    motor_4_commander.publish(command4);
+}
 
+void Commander::left(double speed) {
+    std_msgs::Float64 command1;
+    std_msgs::Float64 command2;
+    std_msgs::Float64 command3;
+    std_msgs::Float64 command4;
 
+    command1.data = -speed;
+    command2.data = -speed;
+    command3.data = -speed;
+    command4.data = -speed;
+    
+    motor_1_commander.publish(command1);
+    motor_2_commander.publish(command2);
+    motor_3_commander.publish(command3);
+    motor_4_commander.publish(command4);
+}
+
+void Commander::right(double speed) {
+    std_msgs::Float64 command1;
+    std_msgs::Float64 command2;
+    std_msgs::Float64 command3;
+    std_msgs::Float64 command4;
+
+    command1.data = speed;
+    command2.data = speed;
+    command3.data = speed;
+    command4.data = speed;
+    
+    motor_1_commander.publish(command1);
+    motor_2_commander.publish(command2);
+    motor_3_commander.publish(command3);
+    motor_4_commander.publish(command4);
+}
+
+void Commander::back(double speed) {
+    std_msgs::Float64 command1;
+    std_msgs::Float64 command2;
+    std_msgs::Float64 command3;
+    std_msgs::Float64 command4;
+
+    command1.data = -speed;
+    command2.data = -speed;
+    command3.data = speed;
+    command4.data = speed;
+    
     motor_1_commander.publish(command1);
     motor_2_commander.publish(command2);
     motor_3_commander.publish(command3);

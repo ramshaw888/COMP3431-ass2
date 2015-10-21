@@ -39,15 +39,21 @@ int main(int argc, char **argv) {
     JoyStickConverter cortana(n);
     ROS_INFO("JoyStickConverter Initialised");
 
-    ros::Rate loop_rate(10);
-    
+    ros::Rate loop_rate(1);
+    bool forward = true;
     while(ros::ok()) {
         
         geometry_msgs::TwistStamped mockMessage;
-        mockMessage.twist.linear.x = 10;
-        mockMessage.twist.linear.y = 0;
-        mockMessage.twist.linear.z = 0;
-
+        if(forward) {
+            mockMessage.twist.linear.x = 10;
+            mockMessage.twist.linear.y = 0;
+            mockMessage.twist.linear.z = 0;
+            mockMessage.twist.angular.z = 0;
+        }
+        else {
+            mockMessage.twist.angular.z = 10;
+        }
+        forward = !forward;
         cortana.publish(mockMessage);
         ros::spinOnce();
         loop_rate.sleep();
