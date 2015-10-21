@@ -14,8 +14,9 @@
 
 using namespace std;
 
-void imageCallback(const sensor_msgs::Image::ConstPtr &image) {
-    ROS_INFO("Image recieved.");
+void imageCallback(const sensor_msgs::Image::ConstPtr &image)
+{
+    ROS_INFO("Image recieved. Generating image imageSyb.ppm...");
     
     std::ofstream outFile ( "imageSub.ppm", std::ios::binary );
     outFile<< "P6\n" << pi_cam.getWidth() << " " << pi_cam.getHeight() << " 255\n";
@@ -27,6 +28,6 @@ int main (int argc, char **argv)
     ros:init(argc, argv, "image_listener");
     ros:NodeHandle nh;
 
-    ros::Subscriber color_sub = n.subscribe("camera/image", 1, imageCallback);
+    ros::Subscriber color_sub = nh.subscribe("camera/image", 1, imageCallback);
     ros::spin();
 }
