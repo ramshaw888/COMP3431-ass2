@@ -1,3 +1,4 @@
 build/*
 devel/*
+src/dynamixel_motor/dynamixel_tutorials/config/pan.yaml
 *.pyc
