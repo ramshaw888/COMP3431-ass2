@@ -44,14 +44,9 @@ Commander::Commander(ros::NodeHandle n_): n(n_) {
 }
 
 void Commander::geometryCallback(const geometry_msgs::TwistStamped::ConstPtr& vector) {
-    ROS_INFO("COMMANDER: MESSAGE RECEIVED");
     geometry_msgs::Twist v = vector->twist;    
-    if(v.angular.z == 0) {
-        forward(v.linear.x);
-    }
-    else {
-        left(v.angular.z);
-    }
+    left(v.linear.x - v.linear.y);
+    right(v.linear.x + v.linear.y);
 
     std_msgs::Float64 tilt1;
     tilt1.data = -1.25;
@@ -81,33 +76,21 @@ void Commander::forward(double speed) {
 void Commander::left(double speed) {
     std_msgs::Float64 command1;
     std_msgs::Float64 command2;
-    std_msgs::Float64 command3;
-    std_msgs::Float64 command4;
-
-    command1.data = -speed;
-    command2.data = -speed;
-    command3.data = -speed;
-    command4.data = -speed;
-    
-    motor_1_commander.publish(command1);
-    motor_2_commander.publish(command2);
-    motor_3_commander.publish(command3);
-    motor_4_commander.publish(command4);
-}
-
-void Commander::right(double speed) {
-    std_msgs::Float64 command1;
-    std_msgs::Float64 command2;
-    std_msgs::Float64 command3;
-    std_msgs::Float64 command4;
 
     command1.data = speed;
     command2.data = speed;
-    command3.data = speed;
-    command4.data = speed;
     
     motor_1_commander.publish(command1);
     motor_2_commander.publish(command2);
+}
+
+void Commander::right(double speed) {
+    std_msgs::Float64 command3;
+    std_msgs::Float64 command4;
+
+    command3.data = -speed;
+    command4.data = -speed;
+    
     motor_3_commander.publish(command3);
     motor_4_commander.publish(command4);
 }

@@ -23,8 +23,14 @@ JoyStickConverter::JoyStickConverter(ros::NodeHandle n_): n(n_) {
 }
 
 void JoyStickConverter::joyStickCallback(const sensor_msgs::Joy::ConstPtr& joystick_message) {
-    ROS_INFO("joystick recieved");
     geometry_msgs::TwistStamped vector;
+    if(joystick_message->buttons[4] == 0) {
+        vector.twist.linear.x = 0;
+        vector.twist.linear.y = 0;
+        vector.twist.angular.z = 0;
+        motor_vector.publish(vector);
+        return;
+    }
     vector.twist.linear.x = joystick_message->axes[1] * 10;
     vector.twist.linear.y = joystick_message->axes[0] * 10;
     vector.twist.angular.z = 0;

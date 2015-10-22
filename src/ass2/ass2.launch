@@ -27,4 +27,5 @@
         output="screen"/>
     <node name="commander" pkg="ass2" type="commander" output="screen"/>
     <node name="joyStickConverter" pkg="ass2" type="joyStickConverter" output="screen"/>
+    <node name="joy_node" pkg="joy" type="joy_node" output="screen"/>
 </launch>

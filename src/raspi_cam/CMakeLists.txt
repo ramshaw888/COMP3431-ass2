@@ -129,8 +129,8 @@ include_directories(
 
 ## Declare a C++ executable
 add_executable(camera src/simple_camera.cpp)
-add_executable(imagePub src/imagePub.cpp)
-add_executable(imageSubTester src/imageSubTester.cpp)
+#add_executable(imagePub src/imagePub.cpp)
+#add_executable(imageSubTester src/imageSubTester.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -142,15 +142,15 @@ target_link_libraries(camera
    ${raspicam_LIBS}
 )
 
-target_link_libraries (imagePub
-   ${catkin_LIBRARIES}
-   ${raspicam_LIBS}
-)
+#target_link_libraries (imagePub
+#   ${catkin_LIBRARIES}
+#   ${raspicam_LIBS}
+#)
 
-target_link_libraries (imageSubTester
-   ${catkin_LIBRARIES}
-   ${raspicam_LIBS}
-)
+#target_link_libraries (imageSubTester
+#   ${catkin_LIBRARIES}
+#   ${raspicam_LIBS}
+#)
 
 #############
 ## Install ##
