@@ -44,10 +44,14 @@ ImagePub::ImagePub()
 
   cameraWidth = pi_cam.getWidth();
   cameraHeight = pi_cam.getHeight();
-  imageSize = pi_cam.getImageTypeSize( raspicam::RASPICAM_FORMAT_RGB);
-    
+  imageSize = /*cameraWidth * cameraHeight * */pi_cam.getImageTypeSize( raspicam::RASPICAM_FORMAT_RGB);
+   
+   cout << "Width : " << cameraWidth << endl;
+   cout << "Height : " << cameraHeight << endl;
+   cout << "imageSize : " << imageSize << endl;
   //initialize memory for the current image
   currImg = new unsigned char[imageSize]; //NOTE: this image will be of type RGB8
+  cout << "sizeof currImg: " << sizeof currImg << " and [0]: " << sizeof currImg[0] << endl;
   //wait while the camera stabilizes
   usleep(3);
 }
@@ -76,8 +80,11 @@ void ImagePub::publish()
   message.height = cameraHeight;
   message.width = cameraWidth;
   message.encoding = sensor_msgs::image_encodings::RGB8;
-  message.step = cameraWidth / 8;
-  message.data = std::vector<unsigned char>(currImg, currImg + sizeof currImg / sizeof currImg[0]);
+  message.step = 3 * cameraWidth;
+  message.data = std::vector<unsigned char>(currImg, currImg + (int)((int)cameraWidth * (int)cameraHeight) * 3);
+  cout << "sizeof currImg: " << sizeof currImg << " and [0]: " << sizeof currImg[0] << endl;
+
+  cout << "Data vector size " << message.data.size() <<endl;
       
   publisher.publish(message);
 }
