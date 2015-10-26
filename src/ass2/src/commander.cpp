@@ -1,6 +1,8 @@
 #include "ros/ros.h"
 #include "std_msgs/Float64.h"
+#include "std_msgs/Header.h"
 #include "geometry_msgs/TwistStamped.h"
+#include "dynamixel_msgs/JointState.h"
 
 #include <sstream>
 
@@ -9,20 +11,35 @@ bool isrunning = true;
 class Commander {
 public: 
     Commander(ros::NodeHandle n_);
-    void geometryCallback(const geometry_msgs::TwistStamped::ConstPtr& vector);
+    void motor_geometry_callback(const geometry_msgs::TwistStamped::ConstPtr& vector);
+    void servo_geometry_callback(const geometry_msgs::TwistStamped::ConstPtr& vector);
+    void servo_state_callback(const dynamixel_msgs::JointState::ConstPtr& state);
 
 private:
     ros::NodeHandle n;
-
+    
+    // Wheel movement topics
     ros::Publisher motor_1_commander;
     ros::Publisher motor_2_commander;
     ros::Publisher motor_3_commander;
     ros::Publisher motor_4_commander;
+
+    // Arm movement topics
     ros::Publisher servo_1_commander;
     ros::Publisher servo_2_commander;
     ros::Publisher servo_3_commander;
-    
-    ros::Subscriber geometry_sub;
+   
+    // geometry published by joy_stick_converter
+    ros::Subscriber motor_geometry_sub;
+    ros::Subscriber servo_geometry_sub;
+    ros::Subscriber servo_1_state_sub;
+    ros::Subscriber servo_2_state_sub;
+    ros::Subscriber servo_3_state_sub;
+
+    // Current positions of arm servos
+    std_msgs::Float64 servo_1_position;
+    std_msgs::Float64 servo_2_position;
+    std_msgs::Float64 servo_3_position;
 
     void forward(double speed);
     void left(double speed);
@@ -40,20 +57,78 @@ Commander::Commander(ros::NodeHandle n_): n(n_) {
     servo_2_commander = n.advertise<std_msgs::Float64>("/tilt_controller_2/command", 1000);
     servo_3_commander = n.advertise<std_msgs::Float64>("/tilt_controller_3/command", 1000);
 
-    geometry_sub = n.subscribe("command_vector", 1, &Commander::geometryCallback, this);
+    servo_1_state_sub = n.subscribe("servo_controller_1/state", 1, &Commander::servo_state_callback, this);
+    servo_2_state_sub = n.subscribe("servo_controller_2/state", 1, &Commander::servo_state_callback, this);
+    servo_3_state_sub = n.subscribe("servo_controller_3/state", 1, &Commander::servo_state_callback, this);
+
+    motor_geometry_sub = n.subscribe("motor_command_vector", 1, &Commander::motor_geometry_callback, this);
+    servo_geometry_sub = n.subscribe("servo_command_vector", 1, &Commander::servo_geometry_callback, this);
+
+    servo_1_position.data = 0;
+    servo_2_position.data = 0;
+    servo_3_position.data = 0;
 }
 
-void Commander::geometryCallback(const geometry_msgs::TwistStamped::ConstPtr& vector) {
-    geometry_msgs::Twist v = vector->twist;    
+void Commander::motor_geometry_callback(const geometry_msgs::TwistStamped::ConstPtr& vector) {
+    geometry_msgs::Twist v = vector->twist;
     left(v.linear.x - v.linear.y);
     right(v.linear.x + v.linear.y);
+}
 
-    std_msgs::Float64 tilt1;
-    tilt1.data = -1.25;
-    servo_1_commander.publish(tilt1);
-    std_msgs::Float64 tilt2;
-    tilt2.data = 0.0;
-    servo_2_commander.publish(tilt2);
+void Commander::servo_geometry_callback(const geometry_msgs::TwistStamped::ConstPtr& vector) {
+    geometry_msgs::Twist v = vector->twist;
+
+    // Increment positions
+    // All positions are in radians
+    servo_1_position.data += (0.05*v.angular.x);
+    servo_2_position.data += (0.07*v.angular.z);
+    servo_3_position.data += (0.05*v.angular.y);
+
+    // Limits
+    std_msgs::Float64 limit_1;
+    limit_1.data = 1.3;
+    std_msgs::Float64 limit_2;
+    limit_2.data = 1.3;
+    std_msgs::Float64 limit_3;
+    limit_3.data = 2.2;
+
+    if( servo_1_position.data < -limit_1.data) {
+        servo_1_position.data = -limit_1.data;
+    }
+    else if( servo_1_position.data > limit_1.data ) {
+        servo_1_position.data = limit_1.data;
+    }
+
+    if( servo_2_position.data < -limit_2.data ) {
+        servo_2_position.data = -limit_2.data;
+    }
+    else if( servo_2_position.data > limit_2.data ) {
+        servo_2_position.data = limit_2.data;
+    }
+
+    if( servo_3_position.data < -limit_3.data ) {
+        servo_3_position.data = -limit_3.data;
+    }
+    else if( servo_3_position.data > limit_3.data) {
+        servo_3_position.data = limit_3.data;
+    }
+
+
+    servo_1_commander.publish(servo_1_position);
+    servo_2_commander.publish(servo_2_position);
+    servo_3_commander.publish(servo_3_position);
+
+}
+
+void Commander::servo_state_callback(const dynamixel_msgs::JointState::ConstPtr& state) {
+    if( state->name == "position_joint_1" ) {
+        servo_1_position.data = state->goal_pos;       
+    }
+    else if( state->name == "position_joint_2" ) {
+        servo_2_position.data = state->goal_pos;       
+    } else if( state->name == "position_joint_3" ) {
+        servo_3_position.data = state->goal_pos;       
+    }
 }
 
 void Commander::forward(double speed) {

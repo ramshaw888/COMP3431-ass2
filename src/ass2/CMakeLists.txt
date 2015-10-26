@@ -7,6 +7,7 @@ project(ass2)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  dynamixel_msgs
 )
 
 ## System dependencies are found with CMake's conventions
