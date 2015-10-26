@@ -32,4 +32,5 @@
             autorepeat_rate : 20.0
         </rosparam>
     </node>
+    <node name="imagePub" pkg="raspi_cam" type="imagePub" output="screen"/>
 </launch>

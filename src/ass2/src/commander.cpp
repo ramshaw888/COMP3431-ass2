@@ -82,7 +82,7 @@ void Commander::servo_geometry_callback(const geometry_msgs::TwistStamped::Const
     // All positions are in radians
     servo_1_position.data += (0.05*v.angular.x);
     servo_2_position.data += (0.07*v.angular.z);
-    servo_3_position.data += (0.05*v.angular.y);
+    servo_3_position.data -= (0.05*v.angular.y);
 
     // Limits
     std_msgs::Float64 limit_1;
@@ -91,7 +91,7 @@ void Commander::servo_geometry_callback(const geometry_msgs::TwistStamped::Const
     limit_2.data = 1.3;
     std_msgs::Float64 limit_3;
     limit_3.data = 2.2;
-
+/*
     if( servo_1_position.data < -limit_1.data) {
         servo_1_position.data = -limit_1.data;
     }
@@ -112,7 +112,7 @@ void Commander::servo_geometry_callback(const geometry_msgs::TwistStamped::Const
     else if( servo_3_position.data > limit_3.data) {
         servo_3_position.data = limit_3.data;
     }
-
+*/
 
     servo_1_commander.publish(servo_1_position);
     servo_2_commander.publish(servo_2_position);

@@ -199,3 +199,7 @@ target_link_libraries(camera
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(imagePub src/imagePub.cpp)
+target_link_libraries(imagePub ${catkin_LIBRARIES})
+

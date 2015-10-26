@@ -36,30 +36,28 @@ public:
 
 ImagePub::ImagePub()
 {
+  ROS_INFO("EMUUUUU");
   //initialise publisher
   publisher = n.advertise<sensor_msgs::Image>("/camera_image", 1);
 
   //open the camera
   ROS_DEBUG("Opening Camera..");
-  if ( !pi_cam.open()) { ROS_ERROR("Error opening camera"); return; }
 
+  pi_cam.setCaptureSize(320,240);
+  pi_cam.setFormat( raspicam::RASPICAM_FORMAT_RGB );
+  pi_cam.setVerticalFlip( true );
+  pi_cam.setVideoStabilization( false );
+
+  if ( !pi_cam.open()) { ROS_ERROR("Error opening camera"); return; }
   cameraWidth = pi_cam.getWidth();
   cameraHeight = pi_cam.getHeight();
-//<<<<<<< HEAD
-//  imageSize = /*cameraWidth * cameraHeight * */pi_cam.getImageTypeSize( raspicam::RASPICAM_FORMAT_RGB);
-   
-//   cout << "Width : " << cameraWidth << endl;
-//   cout << "Height : " << cameraHeight << endl;
-//   cout << "imageSize : " << imageSize << endl;
-//=======
   cameraStep = 3 * cameraWidth;
   imageSize = pi_cam.getImageTypeSize(raspicam::RASPICAM_FORMAT_RGB);
-    
-//>>>>>>> 2748170fe4577e6456ec70c536e6abf59f429aef
+//  ROS_INFO("Camera width " + cameraWidth + "Camera Height " + cameraHeight);
+
   //initialize memory for the current image
   currImg = new unsigned char[imageSize]; //NOTE: this image will be of type RGB8
-  cout << "sizeof currImg: " << sizeof currImg << " and [0]: " << sizeof currImg[0] << endl;
-  //wait while the camera stabilizes
+   //wait while the camera stabilizes
   usleep(3);
 }
 
@@ -81,35 +79,17 @@ void ImagePub::capture()
 // and publishing it to 'camera/image'
 void ImagePub::publish()
 {
-//<<<<<<< HEAD
- // sensor_msgs::Image message;
-//
-//  //set message variables
-//  message.height = cameraHeight;
-//  message.width = cameraWidth;
-//  message.encoding = sensor_msgs::image_encodings::RGB8;
-//  message.step = 3 * cameraWidth;
-//  message.data = std::vector<unsigned char>(currImg, currImg + (int)((int)cameraWidth * (int)cameraHeight) * 3);
-//  cout << "sizeof currImg: " << sizeof currImg << " and [0]: " << sizeof currImg[0] << endl;
-//=======
-  // CURRENTLY JUST SAVES TO FILE
-  //std::ofstream outFile ( "raspicam_image.ppm", std::ios::binary );
-  //outFile<< "P6\n" << pi_cam.getWidth() << " " << pi_cam.getHeight() << " 255\n";
-  //outFile.write((char*) currImg, imageSize);
 
-  // create image message
   sensor_msgs::Image message;
-  message.header = std_msgs::Header();
+
+  //set message variables
   message.height = cameraHeight;
   message.width = cameraWidth;
-  message.encoding = "bgr8";
-  message.is_bigendian = false;
-  message.step = cameraStep;
-  message.data = * currImg;
-//>>>>>>> 2748170fe4577e6456ec70c536e6abf59f429aef
+  message.encoding = sensor_msgs::image_encodings::RGB8;
+  message.step = 3 * cameraWidth;
+  message.data = std::vector<unsigned char>(currImg, currImg + (int)((int)cameraWidth * (int)cameraHeight) * 3);
 
-  cout << "Data vector size " << message.data.size() <<endl;
-      
+  //publish     
   publisher.publish(message);
 }
 
@@ -118,7 +98,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "imagePub");
   ros::NodeHandle n;
-  ros::Rate r(100);
+  ros::Rate r(1000);
 
   ImagePub p = ImagePub();
 
