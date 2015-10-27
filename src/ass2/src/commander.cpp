@@ -80,45 +80,74 @@ void Commander::servo_geometry_callback(const geometry_msgs::TwistStamped::Const
 
     // Increment positions
     // All positions are in radians
-    servo_1_position.data += (0.05*v.angular.x);
-    servo_2_position.data += (0.07*v.angular.z);
-    servo_3_position.data -= (0.05*v.angular.y);
+    servo_1_position.data += (0.05*v.linear.x);
+    servo_1_position.data += (0.07*v.linear.z);
+
+    servo_2_position.data += (0.07*v.linear.z);
+
+    servo_3_position.data += (0.05*v.linear.y);
+
+
+    // Set angular position if A or B is pushed
+
+    if( v.angular.x != 0 ||
+        v.angular.z != 0 ||
+        v.angular.y != 0 ) {
+
+        servo_1_position.data = v.angular.x;
+        servo_2_position.data = v.angular.z; 
+        servo_3_position.data = v.angular.y;
+    }
+
 
     // Limits
-    std_msgs::Float64 limit_1;
-    limit_1.data = 1.3;
-    std_msgs::Float64 limit_2;
-    limit_2.data = 1.3;
-    std_msgs::Float64 limit_3;
-    limit_3.data = 2.2;
-/*
-    if( servo_1_position.data < -limit_1.data) {
-        servo_1_position.data = -limit_1.data;
+
+    // Middle servo 
+    std_msgs::Float64 servo_1_min;
+    std_msgs::Float64 servo_1_max;
+    servo_1_min.data = -1.4;
+    servo_1_max.data = 1.4;
+
+    // Bottom servo 
+    std_msgs::Float64 servo_2_min;
+    std_msgs::Float64 servo_2_max;
+    servo_2_min.data = -1.3;
+    servo_2_max.data = 2.8;
+
+
+    // Top servo
+    std_msgs::Float64 servo_3_min;
+    std_msgs::Float64 servo_3_max;
+    servo_3_min.data = -1.5;
+    servo_3_max.data = 1.5;
+
+    if( servo_1_position.data < servo_1_min.data) {
+        servo_1_position.data = servo_1_min.data;
     }
-    else if( servo_1_position.data > limit_1.data ) {
-        servo_1_position.data = limit_1.data;
+    else if( servo_1_position.data > servo_1_max.data ) {
+        servo_1_position.data = servo_1_max.data;
     }
 
-    if( servo_2_position.data < -limit_2.data ) {
-        servo_2_position.data = -limit_2.data;
+    if( servo_2_position.data < servo_2_min.data) {
+        servo_2_position.data = servo_2_min.data;
     }
-    else if( servo_2_position.data > limit_2.data ) {
-        servo_2_position.data = limit_2.data;
+    else if( servo_2_position.data > servo_2_max.data ) {
+        servo_2_position.data = servo_2_max.data;
     }
 
-    if( servo_3_position.data < -limit_3.data ) {
-        servo_3_position.data = -limit_3.data;
+    if( servo_3_position.data < servo_3_min.data) {
+        servo_3_position.data = servo_3_min.data;
     }
-    else if( servo_3_position.data > limit_3.data) {
-        servo_3_position.data = limit_3.data;
+    else if( servo_3_position.data > servo_3_max.data ) {
+        servo_3_position.data = servo_3_max.data;
     }
-*/
 
     servo_1_commander.publish(servo_1_position);
     servo_2_commander.publish(servo_2_position);
     servo_3_commander.publish(servo_3_position);
 
 }
+
 
 void Commander::servo_state_callback(const dynamixel_msgs::JointState::ConstPtr& state) {
     if( state->name == "position_joint_1" ) {

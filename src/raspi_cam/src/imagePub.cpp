@@ -44,8 +44,10 @@ ImagePub::ImagePub()
   ROS_DEBUG("Opening Camera..");
 
   pi_cam.setCaptureSize(320,240);
+
   pi_cam.setFormat( raspicam::RASPICAM_FORMAT_RGB );
   pi_cam.setVerticalFlip( true );
+  pi_cam.setHorizontalFlip( true );
   pi_cam.setVideoStabilization( false );
 
   if ( !pi_cam.open()) { ROS_ERROR("Error opening camera"); return; }
@@ -53,7 +55,6 @@ ImagePub::ImagePub()
   cameraHeight = pi_cam.getHeight();
   cameraStep = 3 * cameraWidth;
   imageSize = pi_cam.getImageTypeSize(raspicam::RASPICAM_FORMAT_RGB);
-//  ROS_INFO("Camera width " + cameraWidth + "Camera Height " + cameraHeight);
 
   //initialize memory for the current image
   currImg = new unsigned char[imageSize]; //NOTE: this image will be of type RGB8

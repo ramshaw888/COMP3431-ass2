@@ -30,17 +30,41 @@ void JoyStickConverter::joyStickCallback(const sensor_msgs::Joy::ConstPtr& joyst
         vector.twist.angular.z = 0;
         motor_vector.publish(vector);
     } else {
-        vector.twist.linear.x = joystick_message->axes[1] * 10;
-        vector.twist.linear.y = joystick_message->axes[0] * 10;
+        vector.twist.linear.x = joystick_message->axes[1] * 30;
+        vector.twist.linear.y = joystick_message->axes[0] * 30;
         vector.twist.angular.z = 0;
         motor_vector.publish(vector);
     }
 
+    // x -> Motor 1 (middle)
+    // y -> Motor 3 (top camera motor)
+    // z -> Motor 2 (bottom)
+
     // Tilt motors
     if(joystick_message->buttons[5] != 0) {
-        vector.twist.angular.x = joystick_message->axes[4];
-        vector.twist.angular.y = joystick_message->axes[3];
-        vector.twist.angular.z = joystick_message->axes[7];
+        vector.twist.linear.x = joystick_message->axes[4];
+        vector.twist.linear.y = joystick_message->axes[3];
+        vector.twist.linear.z = joystick_message->axes[7];
+        servo_vector.publish(vector);
+    }
+
+    // Reset to low balanced position
+    // A Button
+    if(joystick_message->buttons[0] == 1) {
+        ROS_INFO("JoyStickConverter : Resetting back to balanced position");
+        vector.twist.angular.x = 0.0;
+        vector.twist.angular.z = -0.78;
+        vector.twist.angular.y = 0.0;
+        servo_vector.publish(vector);
+    }
+
+    // Reset to low balanced position
+    // B Button
+    if(joystick_message->buttons[1] == 1) {
+        ROS_INFO("JoyStickConverter : Resetting to front view position");
+        vector.twist.angular.x = 0.2;
+        vector.twist.angular.z = -0.4;
+        vector.twist.angular.y = 0.0;
         servo_vector.publish(vector);
     }
 
