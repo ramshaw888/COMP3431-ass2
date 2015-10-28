@@ -41,6 +41,17 @@ private:
     std_msgs::Float64 servo_2_position;
     std_msgs::Float64 servo_3_position;
 
+    // Servo limits
+    std_msgs::Float64 servo_1_min;
+    std_msgs::Float64 servo_1_max;
+
+    std_msgs::Float64 servo_2_min;
+    std_msgs::Float64 servo_2_max;
+
+    std_msgs::Float64 servo_3_min;
+    std_msgs::Float64 servo_3_max;
+
+
     void forward(double speed);
     void left(double speed);
     void right(double speed);
@@ -67,6 +78,32 @@ Commander::Commander(ros::NodeHandle n_): n(n_) {
     servo_1_position.data = 0;
     servo_2_position.data = 0;
     servo_3_position.data = 0;
+
+    // Limits
+    // Middle servo 
+    servo_1_min.data = -1.4;
+    servo_1_max.data = 1.4;
+
+    n.getParam("/commander/servo_limits/1_min", servo_1_min.data);
+    n.getParam("/commander/servo_limits/1_max", servo_1_max.data);
+
+    // Bottom servo 
+    servo_2_min.data = -1.3;
+    servo_2_max.data = 2.8;
+
+    n.getParam("/commander/servo_limits/2_min", servo_2_min.data);
+    n.getParam("/commander/servo_limits/2_max", servo_2_max.data);
+
+    // Top servo
+    servo_3_min.data = -1.5;
+    servo_3_max.data = 1.5;
+
+    n.getParam("/commander/servo_limits/3_min", servo_3_min.data);
+    n.getParam("/commander/servo_limits/3_max", servo_3_max.data);
+
+    ROS_INFO("Commander: Received limits from param server");
+    ROS_INFO("servo_1_min %f", servo_1_min.data);
+
 }
 
 void Commander::motor_geometry_callback(const geometry_msgs::TwistStamped::ConstPtr& vector) {
@@ -99,27 +136,6 @@ void Commander::servo_geometry_callback(const geometry_msgs::TwistStamped::Const
         servo_3_position.data = v.angular.y;
     }
 
-
-    // Limits
-
-    // Middle servo 
-    std_msgs::Float64 servo_1_min;
-    std_msgs::Float64 servo_1_max;
-    servo_1_min.data = -1.4;
-    servo_1_max.data = 1.4;
-
-    // Bottom servo 
-    std_msgs::Float64 servo_2_min;
-    std_msgs::Float64 servo_2_max;
-    servo_2_min.data = -1.3;
-    servo_2_max.data = 2.8;
-
-
-    // Top servo
-    std_msgs::Float64 servo_3_min;
-    std_msgs::Float64 servo_3_max;
-    servo_3_min.data = -1.5;
-    servo_3_max.data = 1.5;
 
     if( servo_1_position.data < servo_1_min.data) {
         servo_1_position.data = servo_1_min.data;

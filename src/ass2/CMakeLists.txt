@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
+set(CMAKE_CXX_FLAGS "-std=c++0x -I/usr/local/include -lraspicam")
 project(ass2)
 
 ## Find catkin macros and libraries
@@ -9,6 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   dynamixel_msgs
   sensor_msgs
+  cv_bridge
+  image_transport
 )
 
 ## System dependencies are found with CMake's conventions
@@ -192,7 +195,12 @@ include_directories(
 
 add_executable(commander src/commander.cpp)
 target_link_libraries(commander ${catkin_LIBRARIES})
+
 add_executable(joyStickConverter src/joy_stick_converter.cpp)
 target_link_libraries(joyStickConverter ${catkin_LIBRARIES})
+
 add_executable(emu_state_publisher src/emu_state_publisher.cpp)
 target_link_libraries(emu_state_publisher ${catkin_LIBRARIES})
+
+add_executable(image_publisher src/image_publisher.cpp)
+target_link_libraries(image_publisher ${catkin_LIBRARIES})
