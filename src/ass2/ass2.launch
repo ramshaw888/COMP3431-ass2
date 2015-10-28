@@ -1,5 +1,6 @@
 <launch>
     <param name="/use_sim_time" value="false"/>
+    <param name="robot_description" textfile="emu.urdf"/>
     <node name="dynamixel_manager" pkg="dynamixel_controllers" type="controller_manager.py"
         required="true" output="screen">
         <rosparam>
@@ -33,4 +34,7 @@
         </rosparam>
     </node>
     <node name="imagePub" pkg="raspi_cam" type="imagePub" output="screen"/>
+    <node name="emu_state_publisher" pkg="ass2" type="emu_state_publisher" output="screen" />
+
+    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />-->
 </launch>

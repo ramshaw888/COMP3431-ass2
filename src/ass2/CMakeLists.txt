@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   dynamixel_msgs
+  sensor_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -193,5 +194,5 @@ add_executable(commander src/commander.cpp)
 target_link_libraries(commander ${catkin_LIBRARIES})
 add_executable(joyStickConverter src/joy_stick_converter.cpp)
 target_link_libraries(joyStickConverter ${catkin_LIBRARIES})
-#add_executable(image_publisher src/image_publisher.cpp)
-#target_link_libraries(image_publisher ${catkin_LIBRARIES})
+add_executable(emu_state_publisher src/emu_state_publisher.cpp)
+target_link_libraries(emu_state_publisher ${catkin_LIBRARIES})

@@ -40,6 +40,9 @@ void JoyStickConverter::joyStickCallback(const sensor_msgs::Joy::ConstPtr& joyst
     // y -> Motor 3 (top camera motor)
     // z -> Motor 2 (bottom)
 
+    // We set twist.linear values when incrementing the motors,
+    // and twist.angular when setting them to a specified radian value.
+
     // Tilt motors
     if(joystick_message->buttons[5] != 0) {
         vector.twist.linear.x = joystick_message->axes[4];
@@ -62,9 +65,9 @@ void JoyStickConverter::joyStickCallback(const sensor_msgs::Joy::ConstPtr& joyst
     // B Button
     if(joystick_message->buttons[1] == 1) {
         ROS_INFO("JoyStickConverter : Resetting to front view position");
-        vector.twist.angular.x = 0.2;
+        vector.twist.angular.x = -0.78;
         vector.twist.angular.z = -0.4;
-        vector.twist.angular.y = 0.0;
+        vector.twist.angular.y = 0;
         servo_vector.publish(vector);
     }
 
