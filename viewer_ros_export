@@ -1,0 +1,5 @@
+. /opt/ros/indigo/setup.bash
+. devel/setup.bash
+export LC_ALL="C"
+export ROS_MASTER_URI=http://raspberrypi:11311
+export ROS_IP=10.0.18.10
