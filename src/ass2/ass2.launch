@@ -31,10 +31,10 @@
         output="screen"/>
 
     <node name="commander" pkg="ass2" type="commander" output="screen">
-        <param name="/servo_limits/1_min" value="-1.1"/>
-        <param name="/servo_limits/1_max" value="1.4"/>
+        <param name="/servo_limits/1_min" value="-1.67"/>
+        <param name="/servo_limits/1_max" value="1.67"/>
         <param name="/servo_limits/2_min" value="-1.3"/>
-        <param name="/servo_limits/2_max" value="2.8"/>
+        <param name="/servo_limits/2_max" value="3.0"/>
         <param name="/servo_limits/3_min" value="-1.5"/>
         <param name="/servo_limits/3_max" value="1.5"/>
     </node>
@@ -42,16 +42,16 @@
     <node name="joyStickConverter" pkg="ass2" type="joyStickConverter" output="screen">
 
         <param name="/default_positions/a_pos_cam" value="0"/>
-        <param name="/default_positions/a_pos_head" value="1.0"/>
-        <param name="/default_positions/a_pos_base" value="-1.0"/> 
+        <param name="/default_positions/a_pos_head" value="1.4"/>
+        <param name="/default_positions/a_pos_base" value="-0.78"/> 
 
         <param name="/default_positions/b_pos_cam" value="0"/>
-        <param name="/default_positions/b_pos_head" value="1.0"/>
-        <param name="/default_positions/b_pos_base" value="-0.3"/>
+        <param name="/default_positions/b_pos_head" value="1.15"/>
+        <param name="/default_positions/b_pos_base" value="-0.78"/>
 
-        <param name="/default_positions/y_pos_cam" value="-0.78"/>
-        <param name="/default_positions/y_pos_head" value="-0.4"/>
-        <param name="/default_positions/y_pos_base" value="0"/>
+        <param name="/default_positions/y_pos_cam" value="0"/>
+        <param name="/default_positions/y_pos_head" value="1.5"/>
+        <param name="/default_positions/y_pos_base" value="-0.3"/>
 
 
     </node>
@@ -68,6 +68,6 @@
         <param name="/image_settings/video_stabilisation" value="1"/>
     </node>
     <node name="emu_state_publisher" pkg="ass2" type="emu_state_publisher" output="screen" />
-
+   <!-- <node name="republisher" pkg="image_transport"  -->
     <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />-->
 </launch>
