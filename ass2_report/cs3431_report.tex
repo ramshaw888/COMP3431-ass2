@@ -15,6 +15,7 @@
 \usepackage{listings}
 \usepackage{sidecap}
 \usepackage{wrapfig}
+\usepackage{pdfpages}
 
 \usepackage{color}
 \definecolor{dkgreen}{rgb}{0,0.6,0}
@@ -83,10 +84,10 @@
 
 \pagebreak
 
-\section*{Introduction}
+\section{Introduction}
 The project required the development of an interface between a Raspberry Pi v2, Dynamixel motors and a Raspberry Pi Camera Module to form a mini EMU Robot. Software would be developed using Robot Operating System (ROS) such that the EMU could be controlled remotely using an xbox controller and an image stream. The mini EMU consists of a rectangular chassis with four wheels connected to its’ two longer outer edges. A long arm is mounted, via a motor to the upper carriage of the chassis, and two motors atop the arm create two more pivot points, with the top motor holding the Raspberry Pi Camera. An already constructed mini EMU can be seen in Figure 1.1.
 
-\section*{Background}
+\section{Background}
 Robot Operating System (ROS) is an open-source, meta-operating system for use with robots. It provides a range useful services including: ‘hardware abstraction, low-level device control, implementation of commonly-used functionality, message-passing between processes, and package management’ (ROS wiki, 2014). Within the ROS community there are open-source packages available for a range of sensors and drivers, this includes the Raspberry Pi camera and Dynamixel Motors. ROS also provides tools to run code across multiple computers at once, hence provides the perfect software foundations for this project.\\
 
 \noindent The Raspberry Pi is advertised as a ‘credit card sized computer ’ which can be plugged into a display via a High-Definition Multimedia Interface (HDMI) cable and uses a standard USB keyboard and mouse. The tiny computer consists of a 900 MHz quad –core Central Processing Unit, a 1GB Synchronous Dynamic Random-Access Memory (SDRAM) and an Operating System(OS) of user choice that is stored as a Disk Image on a removable micro-Secure Digital(SD) card. There are 30 plus General Purpose Input – Output (GPIO) pins, four USB input plugs and a 30 way camera connector, which makes the Raspberry Pi perfect for Robotics applications.\\
@@ -95,19 +96,27 @@ Robot Operating System (ROS) is an open-source, meta-operating system for use wi
 
 \noindent The Raspberry Pi Camera Module is a small camera that connects to a Raspberry Pi via a 30 way ribbon cable. The Raspbian OS has built in drivers for cameras connected via this connector, and an Open-Source Application Program Interface (API) for C++ available for use (Salinas, R. 2015).  The camera has video modes of up to 1080p at 30 frames per second (fps) and a still frame resolution of up to 5 Megapixels, hence provides potential for a high quality video stream.\\
 
-\section*{Chassis and Hardware}
+\section{Chassis and Hardware}
+The Mini Emu robot was designed by the Intelligent Robots Group at the Department of Computing, Curtin University. We have 3D printed two robots for use, both equipped with Raspberry Pi and camera. The robots have 4 Dynamixel motors for the wheels, and 3 Dynamixel motors for the arm.
 
+\begin{center}
+    \noindent \includegraphics[height=300pt]{robot}
+\end{center}
 
-\section*{Software}
-\subsection*{Architecture}
-Debian based Raspbian is the official supported operating system for the Raspberry Pi. The OS is installed to the microSD card of the Pi. Raspbian was chosen because of it’s ease of installation and full support and compatibility with the Pi. ROS Indigo is the software platform used for the robot.\\
+\noindent A detachable cardboard underside cover is used to hold in the cables and prevent the components catching or hitting the course.
 
-\subsection*{Dependencies}
+\section{Software}
+\subsection{Architecture}
+Debian based Raspbian is the official supported operating system for the Raspberry Pi. The OS is installed to the microSD card of the Pi. Raspbian was chosen because of it’s ease of installation and full support and compatibility with the Pi. ROS Indigo is the software platform used for the robot.
+
+\includegraphics[width=\textwidth]{rosgraph.pdf}
+
+\subsection{Dependencies}
 
 \noindent The project makes use of the Dynamixel Controllers package - the low level drivers for the Dynamixel motors. The Joystick Drivers package is used to receive commands from the Logitech controller. In addition, Raspicam drivers are used to interface with the Raspberry Pi camera.
 The four nodes in our package are Commander, Emu State Publisher, Image Publisher and Joystick Converter.
 
-\subsection*{Commander}
+\subsection{Commander}
 This node is responsible for subscribing to the the topics published by Joystick Converter for controller input and motor state from Emu State Publisher. It then publishes appropriate commands to the 7 motor controllers.\\
 
 \noindent The four wheel motors are set to pan mode which allows us to specify speeds, published to topics \texttt{/pan\_controller\_[1-4]/command} which take type \texttt{Float64} messages. The three arm motors are set to servo tilt mode which allows us to specify an angle, published to topics \texttt{/tilt\_controller\_[1-3]/command}, which also take type \texttt{Float64} messages (angle in radians).\\
@@ -122,17 +131,17 @@ This node is responsible for subscribing to the the topics published by Joystick
 
 \noindent In addition, to facilitate easy and natural movement from the perspective of the robot driver (using the camera stream), the middle motor is calibrated with the arm base motor such that vertical camera angle remains constant when the arm base motor is moved. This is done by moving the middle joint motor in the opposite direction to the base joint.\\
 
-\subsection*{Emu State Publisher}
+\subsection{Emu State Publisher}
 This node subscribes to the topics \texttt{/tilt\_controller\_[1-3]/state} which give the current positions of the three arm servo motors. It collates the data from the motors and publishes messages of type \texttt{JointState} to topic \texttt{/joint\_states}. This is part of the robot model visualisation, the ROS \texttt{robot\_state\_publisher} takes the \texttt{/joint\_states} topic and calculates the appropriate transforms, published to the \texttt{/tf} topic. RViz can then take the transforms, along with the URDF and model the position of the arm as it moves. \\
 
-\subsection*{Image Publisher}
+\subsection{Image Publisher}
 This node interfaces with the Raspberry Pi camera through the Raspicam drivers (not a ROS package) and publishes messages of type \texttt{sensor\_msgs::Image} to the topic \texttt{/camera\_image}.\\
 
 \noindent The node takes settings defined in the launch file from the parameters server which define image resolution, and whether video stabilisation is turned on. These settings are defined dynamically to allow optimisations based on network speed.\\
 
 \noindent In addition, the \texttt{republish} node in the ROS \texttt{image\_transport} package is then used, subscribing to the \texttt{/camera\_image} node, then compressing the image out to \texttt{/camera\_repub}. This significantly increases the framerate on the robot driver's viewing computer.
 
-\subsection*{Joystick Converter}
+\subsection{Joystick Converter}
 \includegraphics[width=\textwidth]{gamepadedit}
 This node is the interface between the bare joystick drivers and the desired actions. It subscribes to the given topics of type \texttt{sensor\_msgs::Joy} and publishes movement vectors of type \texttt{geometry\_msgs::TwistStamped} to the \texttt{/motor\_command\_vector} and \texttt{/servo\_command\_vector} topics.\\
 
@@ -140,16 +149,24 @@ This node is the interface between the bare joystick drivers and the desired act
 
 \noindent The L1 and R1 buttons are used as dead man's switches to to prevent accidental input. L1 is required to be held down for wheel movement, and R1 is needed for camera and arm movement.\\
 
-\section*{URDF}
+\section{Modelling}
+In order for the robot operator to easily visualise the position of the arm, a 3D model is used. The robot and the 3 arm joints are described using a URDF model, with 3 links - \texttt{base\_link} (main chassis), \texttt{arm}, \texttt{head} and \texttt{camera}.\\
 
-\section*{Results}
+\noindent \includegraphics[width=\textwidth]{rviz}
+
+\noindent The decision to exaggerate the scale in the model components was done to easily allow the operator to understand the position and angles between joints.
+
+\section{Usage}
+On the robot, the \texttt{ass2.launch} file will begin the all of the main nodes. In addition, the \texttt{image\_transport republish} node should be launched if compressed image is required. On the operator computer, the \texttt{viewer.launch} file will begin the \texttt{robot\_state\_publisher}, in addition to opening the RViz configuration file, with the camera stream and live 3D model.
+
+\section{Results}
 In our project demonstration our Emu's performed well, successfully navigating the rescue course and identifying the victims. The robot operator was capable of controlling the robot using the combination of the camera stream and the robot position model. The narrow angle of the camera, and weight imbalances were the primary difficulties.
 
-\section*{Future research}
+\section{Future research}
 Possible additions to this project should increase the ease of naviagtion from the perspecive of the external robot viewer. Currently the camera vision is limited by the network bandwith, which requires us to use a small resolution of 320 * 240 and compressed image quality to acheive high frame rates. The use of the 5GHz network in the Runswift lab would significantly improve this.\\
 
 \noindent The addition of a gyroscope to read the angle the robot is tilted would greatly aid the operator in knowing the position and can be easily incorporated into the 3D URDF model to be viewed in RViz.
 
 
-\section*{References}
+\section{References}
 \end{document}
