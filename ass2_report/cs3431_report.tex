@@ -95,7 +95,7 @@ The Mini Emu is part of the rescue challenge, with the aim of our project being 
 \noindent The project required the development of an interface between a Raspberry Pi v2, Dynamixel motors and a Raspberry Pi Camera Module to form a mini EMU Robot. Software would be developed using Robot Operating System (ROS) such that the EMU could be controlled remotely using a Logitech gamepad controller and an image stream. The mini EMU consists of a rectangular chassis with four wheels connected. A long arm is mounted, via a motor to the upper carriage of the chassis, and two motors atop the arm create two more pivot points, with the top motor holding the Raspberry Pi Camera. An already constructed mini EMU can be seen in Figure \ref{fig:emu}.
 
 \section{Background}
-Robot Operating System (ROS) is an open-source robotics platorms. It provides a range useful services including: ‘hardware abstraction, low-level device control, implementation of commonly-used functionality, message-passing between processes, and package management’ [1]. Within the ROS community there are open-source packages available for a range of sensors and drivers, this includes the Raspberry Pi camera and Dynamixel Motors. ROS also provides tools to run code across multiple computers at once, hence provides the perfect software foundations for this project.\\
+Robot Operating System (ROS) is an open-source robotics platorm. It provides a range of useful services including: ‘hardware abstraction, low-level device control, implementation of commonly-used functionality, message-passing between processes, and package management’ [1]. Within the ROS community there are open-source packages available for a range of sensors and drivers, this includes the Raspberry Pi camera and Dynamixel Motors. ROS also provides tools to run code across multiple computers at once, hence provides the perfect software foundations for this project.\\
 
 \noindent The Raspberry Pi is advertised as a ‘credit card sized computer’ which can be plugged into a display via a High-Definition Multimedia Interface (HDMI) cable and uses a standard USB keyboard and mouse. The tiny computer consists of a 900 MHz quad–core Central Processing Unit, a 1GB Synchronous Dynamic Random-Access Memory (SDRAM) and OS of user choice that is stored on a microSD card. There are 30 plus General Purpose Input – Output (GPIO) pins, four USB inputs and a 30 way camera connector, which makes the Raspberry Pi perfect for robotics applications.\\
 
@@ -131,7 +131,7 @@ The four nodes in our package are Commander, Emu State Publisher, Image Publishe
 \noindent Due to the ARM architecture and OS used on the Raspberry Pi, most of these packages are not available pre-built. Instead, \texttt{rosinstall\_generator}, should be used to download all required dependencies, and then \texttt{catkin\_make\_isolated} to compile into the \texttt{/opt/ros/indigo/} directory.
 
 \subsection{Motor Configuration}
-To control and track the motion and position of the seven motors across the mini EMU robot, the \texttt{dynamixel\_motor} [1] ROS package was used. This ROS package provides drivers for the dynamixel motors, and exposes control and tracking of the motors through ros topics that can be published and subscribed to. \\
+To control and track the motion and position of the seven motors across the mini EMU robot, the \texttt{dynamixel\_motor} [4] ROS package was used. This ROS package provides drivers for the dynamixel motors, and exposes control and tracking of the motors through ros topics that can be published and subscribed to. \\
 
 \noindent The \texttt{dynamixel\_motor} package works by setting up a named controller for each motor in the robot. To initialise these controllers, two files are required. The first is a \texttt{motor.yaml} file which specifies:
 \begin{itemize}
@@ -163,12 +163,12 @@ pan_controller_1:
 <node name="pan_gcontroller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
         args="--manager=dxl_gmanager
               --port pan_gtilt_port
-              pan_gcontroller_1"
+              pan_controller_1"
         output="screen"/>
 \end{lstlisting}
 
 
-\noindent This will then generate two ROS topics, \texttt{pan\_controller\_1/command} and\\ \noindent\texttt{pan\_controller\_1/state}. The first is a topic that can be published to with a motor speed or position, depending on whether the motor is in wheel mode or in position mode. The second is a topic that can be subscribed to that published information about the motor speed and position.
+\noindent This will then generate two ROS topics, \texttt{pan\_controller\_1/command} and\\ \noindent\texttt{pan\_controller\_1/state}. The first is a topic that can be published to with a motor speed or position, depending on whether the motor is in wheel mode or in position mode. The second is a topic that can be subscribed to that publishes information about the motor speed and position.
 
 \newpage
 \subsection{Commander}
@@ -182,7 +182,7 @@ This node is responsible for subscribing to the the topics published by Joystick
 
 \noindent Similarly, the node listens to \texttt{servo\_command\_vector}, which gives directions regarding the movement of the 3 motors making up the arm. Here we consider both the \texttt{twist.linear} and \texttt{twist.angular} vectors. The values of the linear vector are used to increment the position of the arm (all 3 \texttt{x}, \texttt{y} and \texttt{z} for the 3 motors) by publishing new incremented positions to \texttt{/tilt\_controller\_[1-3]/command} after reading the current positions from \texttt{/servo\_controller\_[1-3]/state}. The \texttt{twist.angular} vector is read to set the arm motors into set default positions. Instead the given angles are simply published to the \texttt{/tilt\_controller\_[1-3]/command} topics. \\
 
-\noindent Due to the physical constraints of the chassis, limits are set on the arm motor angles to prevent pushing on the frame and pulling on cables. These limits are taken from the parameters server at launch and override the \texttt{/tilt\_controller\_[1-3]/command} values when appropriate. The middle joint motor is also artifically limited when the arm is extended past the base at an angle greater than 90 degrees - a position which uses the arm to push the whole robot chassis up. This retracts the camera joint, preventing the more fragile camera module from being damaged.\\
+\noindent Due to the physical constraints of the chassis, limits are set on the arm motor angles to prevent pushing on the frame and pulling on cables. These limits are taken from ROS parameters at launch and override the \texttt{/tilt\_controller\_[1-3]/command} values when appropriate. The middle joint motor is also programmatically limited when the arm is extended past the base at an angle greater than 90 degrees - a position which uses the arm to push the whole robot chassis up. This retracts the camera joint, preventing the more fragile camera module from being damaged.\\
 
 \noindent In addition, to facilitate easy and natural movement from the perspective of the robot driver (using the camera stream), the middle motor is calibrated with the arm base motor such that vertical camera angle remains constant when the arm base motor is moved. This is done by moving the middle joint motor in the opposite direction to the base joint.\\
 
@@ -209,7 +209,7 @@ This node interfaces with the Raspberry Pi camera through the Raspicam drivers (
 
 This node is the interface between the bare joystick drivers and the desired actions. It subscribes to the given topics of type \texttt{sensor\_msgs::Joy} and publishes movement vectors of type \texttt{geometry\_msgs::TwistStamped} to the \texttt{/motor\_command\_vector} and \texttt{/servo\_command\_vector} topics. The gamepad layout used is shown in Figure \ref{fig:gamepad}. \\
 
-\noindent Default reset positions are defined in the launch file and taken from the parameter server at startup. The purpose of these is to give an fast way to reset the arm and camera position in the case that the robot driver is confused. These are set to the A, B, X, Y buttons on the controller. \\
+\noindent Default reset positions are defined in the launch file and taken from the parameter server at startup. The purpose of these is to provide a fast way to reset the arm and camera position in the case that the robot driver is confused. These are set to the A, B, X, Y buttons on the controller. \\
 
 \noindent The L1 and R1 buttons are used as dead man's switches to to prevent accidental input. L1 is required to be held down for wheel movement, and R1 is needed for camera and arm movement.\\
 
@@ -228,7 +228,7 @@ In order for the robot operator to easily visualise the position of the arm, a 3
 \noindent The decision to exaggerate the scale in the model components was done to easily allow the operator to understand the position and angles between joints. Figure \ref{fig:rviz} shows what the operator sees when controlling the robot - the camera stream and the model.
 
 \section{Usage}
-On the robot, the \texttt{ass2.launch} file will begin the all of the main nodes. In addition, the \texttt{image\_transport republish} node should be launched if compressed image is required. On the operator computer, the \texttt{viewer.launch} file will begin the \texttt{robot\_state\_publisher}, in addition to opening the RViz configuration file, with the camera stream and live 3D model.
+On the robot, the \texttt{ass2.launch} file will launch all of the main nodes. In addition, the \texttt{image\_transport republish} node should be launched if compressed image is required. On the operator computer, the \texttt{viewer.launch} file will begin the \texttt{robot\_state\_publisher}, in addition to opening the RViz configuration file, with the camera stream and live 3D model.
 
 \section{Results}
 In our project demonstration our Emu's performed well, successfully navigating the rescue course and identifying the victims. The robot operator was capable of controlling the robot using the combination of the camera stream and the robot position model. The narrow angle of the camera, and weight imbalances were the primary difficulties.
