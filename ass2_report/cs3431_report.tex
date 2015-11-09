@@ -16,6 +16,7 @@
 \usepackage{sidecap}
 \usepackage{wrapfig}
 \usepackage{pdfpages}
+\usepackage[toc,page]{appendix}
 
 \usepackage{color}
 \definecolor{dkgreen}{rgb}{0,0.6,0}
@@ -109,12 +110,53 @@ The Mini Emu robot was designed by the Intelligent Robots Group at the Departmen
 \subsection{Architecture}
 Debian based Raspbian is the official supported operating system for the Raspberry Pi. The OS is installed to the microSD card of the Pi. Raspbian was chosen because of it’s ease of installation and full support and compatibility with the Pi. ROS Indigo is the software platform used for the robot.
 
-\includegraphics[width=\textwidth]{rosgraph.pdf}
 
 \subsection{Dependencies}
 
 \noindent The project makes use of the Dynamixel Controllers package - the low level drivers for the Dynamixel motors. The Joystick Drivers package is used to receive commands from the Logitech controller. In addition, Raspicam drivers are used to interface with the Raspberry Pi camera.
 The four nodes in our package are Commander, Emu State Publisher, Image Publisher and Joystick Converter.
+
+\subsection{Motor Configuration}
+To control and track the motion and position of the seven motors across the mini EMU robot, the \texttt{dynamixel\_motor}(1) ros package was used. This ROS package provides drivers for the dynamixel motors, and exposes control and tracking of the motors through ros topics that can be published and subscribed to. \\
+
+\noindent The \texttt{dynamixel\_motor} package works by setting up a named controller for each motor in the robot. To initialise these controllers, two files are required. The first is a motor.yaml file which specifies:
+\begin{itemize}
+    \item The id of the motor to be controlled
+    \item The type of controller required (either torque or position)
+    \item The name of the controller, which will then be used as the name of the topic used to control and track the motor.
+\end{itemize}
+Below is an example of how a wheel motor would be configured.
+
+\begin{lstlisting}
+pan_controller_1:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: pan_joint_1
+    joint_speed: 1.17
+    motor:
+        id: 7
+        init: 512
+        min: 0
+        max: 4095
+\end{lstlisting}
+
+
+\noindent The second file is a motor spawner launch file, that launches a \texttt{controller\_spawner} for each of the controllers named in the motor.yaml file. The controller spawner generates a dynamixel controller for the motor. Below is an example of how a motor controller would be launched for the motor named \texttt{pan\_controller\_1}\\
+
+\begin{lstlisting}
+<node name="pan_gcontroller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+        args="--manager=dxl_gmanager
+              --port pan_gtilt_port
+              pan_gcontroller_1"
+        output="screen"/>
+\end{lstlisting}
+
+
+\noindent This will then generate two ROS topics, \texttt{pan\_controller\_1/command} and \texttt{pan\_controller\_1/state}. The first is a topic that can be published to with a motor speed or position, depending on whether the motor is in wheel mode or in position mode. The second is a topic that can be subscribed to that published information about the motor speed and position. For more information about configuring a dynamixel motor controller see http://wiki.ros.org/dynamixel\_controllers/Tutorials.
+
+[1] Wiki.ros.org, 'dynamixel\_controllers/Tutorials - ROS Wiki', 2015. [Online]. Available: http://wiki.ros.org/dynamixel\_controllers/Tutorials. [Accessed: 08- Nov- 2015].
 
 \subsection{Commander}
 This node is responsible for subscribing to the the topics published by Joystick Converter for controller input and motor state from Emu State Publisher. It then publishes appropriate commands to the 7 motor controllers.\\
@@ -169,4 +211,14 @@ Possible additions to this project should increase the ease of naviagtion from t
 
 
 \section{References}
+
+\begin{appendices}
+\chapter{ROS node graph}
+
+\includegraphics[width=\textheight,angle=90,origin=c]{rosgraph.pdf}
+
+
+
+\end{appendices}
+
 \end{document}
